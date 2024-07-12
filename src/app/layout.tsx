@@ -2,6 +2,7 @@
 "use client";
 
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react"
 
 import "../styles/colors.css";
 import "../styles/classes.css";
@@ -82,6 +83,7 @@ export default function RootLayout({
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
+        <Analytics />
       </body>
     </html>
   );
