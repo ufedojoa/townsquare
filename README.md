@@ -47,10 +47,6 @@ To enhance the functionality and user experience of Town Square, the following i
 
 1. **Ufedojo Atabo (Me)**: Software Engineer - Developed the entire dApp from the ground up, including both the frontend and the smart contracts.
 
-## Originality and Permissions
-
-- This submission is original work, solely owned by me.
-- No third-party trademarks or copyrighted material have been used without proper permission.
 
 ## Setting up
 
