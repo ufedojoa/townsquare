@@ -31,3 +31,9 @@ body {
     text-wrap: balance;
   }
 }
+
+@layer components {
+  .input, input {
+    @apply bg-transparent;
+  }
+}
