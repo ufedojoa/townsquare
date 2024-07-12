@@ -35,6 +35,9 @@ export default function RootLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <html lang="en">
+      <head>
+        <title>TownSquare</title>
+      </head>
       <body className={`${inter.className} dark`}>
         <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
@@ -147,7 +150,7 @@ function Sidebar({ isOpen, close }: { isOpen?: boolean; close?: () => void }) {
                 <img
                   src="/logo.jpeg"
                   alt="TownSquare"
-                  className="object-cover h-full w-full block rounded-full"
+                  className="object-cover h-full w-full rounded-full"
                 />
               </div>
             }
