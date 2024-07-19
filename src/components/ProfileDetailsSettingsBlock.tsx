@@ -7,8 +7,7 @@ import TextInput from "./TextInput";
 import { Address, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { townSquareAbi } from "@/generated";
-import { MAIN_CONTRACT_ADDRESS } from "@/config/constants";
-import { formatNumberCompact } from "@/utils/misc";
+import { contractAddresses } from "@/config/constants";
 
 const InputLabel = ({ label }: { label: string }) => (
   <label className="mb-1 md:mb-1.5 text-lg block font-semibold">{label}</label>
@@ -33,6 +32,7 @@ export const ProfileDetailsSettingsBlock = ({
     token: Address;
   }) => Promise<void>;
 }) => {
+  const { chain } = useAccount();
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
   const [avatar, setAvatar] = useState("");
@@ -41,10 +41,9 @@ export const ProfileDetailsSettingsBlock = ({
   const [loading, setLoading] = useState(false);
   const { data: spaceCreationFee } = useReadContract({
     abi: townSquareAbi,
-    address: MAIN_CONTRACT_ADDRESS,
+    address: contractAddresses[chain?.id ?? 0],
     functionName: "SPACE_CREATION_FEE",
   });
-  const { chain } = useAccount();
 
   console.log(spaceCreationFee, chain);
 

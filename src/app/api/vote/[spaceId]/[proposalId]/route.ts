@@ -1,5 +1,5 @@
-import { ubit, ubitTestnet } from "@/config/chains";
-import { MAIN_CONTRACT_ADDRESS, UBITSCAN_API_URL } from "@/config/constants";
+import { ubitTestnet } from "@/config/chains";
+import { LOCAL_DEV_MODE, contractAddresses } from "@/config/constants";
 import { townSquareAbi } from "@/generated";
 import axios from "axios";
 import {
@@ -12,35 +12,23 @@ import {
   verifyMessage,
 } from "viem";
 import { mnemonicToAccount, privateKeyToAccount } from "viem/accounts";
-import { localhost } from "viem/chains";
+import { localhost, sepolia } from "viem/chains";
 
 const signer = process.env.PRIVATE_KEY
   ? privateKeyToAccount(process.env.PRIVATE_KEY as Address)
   : mnemonicToAccount(process.env.MNEMONIC ?? "");
 
-const deploymentChain = [ubitTestnet, ubit, localhost].find(
-  (c) => c.id === Number.parseInt(process.env.DEPLOYMENT_CHAIN_ID ?? "")
-);
-const publicClient = createWalletClient({
-  account: signer,
-  chain: deploymentChain,
-  transport: http(),
-}).extend(publicActions);
+const acceptedChains = [ubitTestnet, sepolia];
 
-const townSquare = getContract({
-  abi: townSquareAbi,
-  client: publicClient,
-  address: MAIN_CONTRACT_ADDRESS,
-});
-
-const ubitAPIUrl = UBITSCAN_API_URL;
-
-async function fetchTokenDetails(address: Address): Promise<{
+async function fetchTokenDetails(
+  chainId: number,
+  address: Address
+): Promise<{
   name: string;
   symbol: string;
   decimals: number;
 }> {
-  if (deploymentChain?.id === 1337) {
+  if (!acceptedChains.map((chain) => chain.id).includes(chainId)) {
     return {
       name: "Test Token",
       symbol: "TEST",
@@ -48,9 +36,13 @@ async function fetchTokenDetails(address: Address): Promise<{
     };
   }
 
-  const response = await axios.get(ubitAPIUrl, {
-    params: { module: "token", action: "getToken", contractaddress: address },
-  });
+  const response = await axios.get(
+    acceptedChains.find((chain) => chain.id === chainId)?.blockExplorers
+      ?.default.apiUrl ?? "",
+    {
+      params: { module: "token", action: "getToken", contractaddress: address },
+    }
+  );
 
   if (response.status !== 200 || !response.data.result) {
     throw "Error getting token details";
@@ -67,6 +59,7 @@ export async function POST(
   const body = await req.json();
   const spaceId = BigInt(params.spaceId);
   const proposalId = BigInt(params.proposalId);
+  const chainId = Number(body.chainId);
   const choiceIndex = body.choiceIndex;
   const signature = body.signature;
   const user = body.address;
@@ -82,6 +75,25 @@ Choice index: ${choiceIndex}`;
   if (!verifyMessage({ message, signature, address: user })) {
     return Response.json({ error: "Invalid signature" }, { status: 403 });
   }
+
+  if (!contractAddresses[chainId]) {
+    return Response.json({ error: "Invalid chain ID" }, { status: 403 });
+  }
+
+  const publicClient = createWalletClient({
+    account: signer,
+    chain: (LOCAL_DEV_MODE
+      ? [localhost, ...acceptedChains]
+      : acceptedChains
+    ).find((chain) => chain.id === chainId),
+    transport: http(),
+  }).extend(publicActions);
+
+  const townSquare = getContract({
+    abi: townSquareAbi,
+    client: publicClient,
+    address: contractAddresses[chainId] ?? "",
+  });
 
   const [, , tokenId] =
     (await townSquare.read.getSpaceExternal([spaceId])) ?? [];
@@ -103,7 +115,7 @@ Choice index: ${choiceIndex}`;
     );
   }
 
-  const token = await fetchTokenDetails(tokenId); //TODO: Change this to what is received from request
+  const token = await fetchTokenDetails(chainId, tokenId);
   const tokenContract = getContract({
     abi: erc20Abi,
     client: publicClient,

@@ -25,7 +25,7 @@ import {
   zeroHash,
 } from "viem";
 import { townSquareAbi } from "@/generated";
-import { MAIN_CONTRACT_ADDRESS } from "@/config/constants";
+import { contractAddresses } from "@/config/constants";
 
 type PaginationOptions = {
   first?: number;
@@ -41,7 +41,7 @@ export class TownsquareClient {
   private contract = getContract({
     abi: townSquareAbi,
     client: { public: this.publicClient, wallet: this.walletClient },
-    address: MAIN_CONTRACT_ADDRESS,
+    address: contractAddresses[this.chain!.id],
   });
 
   constructor(
