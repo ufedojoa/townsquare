@@ -26,6 +26,8 @@ import {
 } from "viem";
 import { townSquareAbi } from "@/generated";
 import { contractAddresses } from "@/config/constants";
+import { ubitTestnet } from "@/config/chains";
+import { sepolia } from "viem/chains";
 
 type PaginationOptions = {
   first?: number;
@@ -45,7 +47,6 @@ export class TownsquareClient {
   });
 
   constructor(
-    private readonly ubitAPIUrl: string,
     private readonly publicClient: PublicClient,
     private readonly walletClient: WalletClient,
     private account?: Account,
@@ -200,36 +201,49 @@ export class TownsquareClient {
   }
 
   async loadTokenDetails(address: Address): Promise<void> {
-    const tokenInfo = await this.fetchTokenDetails(address);
+    const tokenInfo = await this.fetchTokenDetails(this.chain!.id, address);
 
     this._cachedTokens[address] = {
       name: tokenInfo.name,
       symbol: tokenInfo.symbol,
-      decimals: tokenInfo.decimals,
+      decimals: BigInt(tokenInfo.decimals),
       id: address,
     };
   }
 
-  private async fetchTokenDetails(address: string) {
-    if (this.chain?.id === 1337) {
+  private async fetchTokenDetails(
+    chainId: number,
+    address: Address
+  ): Promise<{
+    name: string;
+    symbol: string;
+    decimals: number;
+  }> {
+    const acceptedChains = [ubitTestnet, sepolia];
+    if (!acceptedChains.map((chain) => chain.id).includes(chainId)) {
       return {
         name: "Test Token",
         symbol: "TEST",
         decimals: 18,
       };
     }
-    const response = await axios.get(this.ubitAPIUrl, {
-      params: { module: "token", action: "getToken", contractaddress: address.toLowerCase() },
-    });
-
+  
+    const response = await axios.get(
+      acceptedChains.find((chain) => chain.id === chainId)?.blockExplorers
+        ?.default.apiUrl ?? "",
+      {
+        params: { module: "token", action: "getToken", contractaddress: address },
+      }
+    );
+  
     if (response.status !== 200 || !response.data.result) {
       throw "Error getting token details";
     }
-
+  
     const tokenInfo = response.data.result;
     return tokenInfo;
   }
-
+  
   private getToken(tokenId: string, decimals?: bigint): Token {
     const token = {
       ...(this._cachedTokens[tokenId] ?? {
