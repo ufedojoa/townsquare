@@ -43,7 +43,7 @@ export class TownsquareClient {
   private contract = getContract({
     abi: townSquareAbi,
     client: { public: this.publicClient, wallet: this.walletClient },
-    address: contractAddresses[this.chain!.id],
+    address: contractAddresses[this.chain?.id ?? sepolia.id],
   });
 
   constructor(
