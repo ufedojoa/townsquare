@@ -29,7 +29,7 @@ const SpaceComponent = ({ space }: { space: Space }) => {
 	);
 };
 
-const SpacesList = ({ className, query }: Props) => {
+const SpacesList = ({ query }: Props) => {
 	const [maxSpacesCount, setMaxSpacesCount] = useState(20);
 	const { data: spaces } = useSpaces(maxSpacesCount);
 

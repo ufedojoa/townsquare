@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react"
-
 import "../styles/colors.css";
 import "../styles/classes.css";
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
+import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { EllipsisVerticalIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { SiGithub } from "@icons-pack/react-simple-icons";
