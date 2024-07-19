@@ -42,7 +42,7 @@ export default function RootLayout({
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider>
               <SpacesContextProvider>
-                <div className="flex w-screen overflow-x-hidden relative">
+                <div className="flex w-screen overflow-x-hidden relative ">
                   <Sidebar
                     isOpen={sidebarOpen}
                     close={() => setSidebarOpen(false)}
@@ -65,7 +65,7 @@ export default function RootLayout({
                       </div>
                     </header>
                     <main
-                      className={`flex-1 w-full max-w-5xl mx-auto ${false ? "" : "p-4 md:p-8 lg:p-16"}`}
+                      className={`prose prose-invert flex-1 w-full max-w-5xl mx-auto ${false ? "" : "p-4 md:p-8 lg:p-16"}`}
                     >
                       {children}
                     </main>

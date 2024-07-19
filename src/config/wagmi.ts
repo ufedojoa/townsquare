@@ -2,6 +2,7 @@ import { http } from "wagmi";
 import { localhost, sepolia } from "wagmi/chains";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { LOCAL_DEV_MODE } from "./constants";
+import { ubitTestnet } from "./chains";
 // Your WalletConnect Cloud project ID
 export const projectId = "5631779592a314149ef3eb3f0ded1275";
 

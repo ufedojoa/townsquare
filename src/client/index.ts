@@ -28,6 +28,7 @@ import { townSquareAbi } from "@/generated";
 import { contractAddresses } from "@/config/constants";
 import { ubitTestnet } from "@/config/chains";
 import { sepolia } from "viem/chains";
+import { readContract } from "viem/actions";
 
 type PaginationOptions = {
   first?: number;
@@ -227,23 +228,40 @@ export class TownsquareClient {
         decimals: 18,
       };
     }
-  
+
     const response = await axios.get(
       acceptedChains.find((chain) => chain.id === chainId)?.blockExplorers
         ?.default.apiUrl ?? "",
       {
-        params: { module: "token", action: "getToken", contractaddress: address },
+        params: {
+          module: "token",
+          action: "getToken",
+          contractaddress: address,
+        },
       }
     );
-  
-    if (response.status !== 200 || !response.data.result) {
-      throw "Error getting token details";
+
+    if (response.status !== 200 || !response.data.result?.name) {
+      const token = getContract({
+        abi: erc20Abi,
+        client: this.publicClient,
+        address,
+      });
+      const decimals = await token.read.decimals();
+      const name = await token.read.name();
+      const symbol = await token.read.symbol();
+
+      return {
+        name,
+        symbol,
+        decimals,
+      };
     }
-  
+
     const tokenInfo = response.data.result;
     return tokenInfo;
   }
-  
+
   private getToken(tokenId: string, decimals?: bigint): Token {
     const token = {
       ...(this._cachedTokens[tokenId] ?? {
@@ -484,7 +502,7 @@ export class TownsquareClient {
 
     const spaceCreationFee = await this.contract.read.SPACE_CREATION_FEE();
 
-    console.log("Space creation fee",spaceCreationFee);
+    console.log("Space creation fee", spaceCreationFee);
 
     const hash = await this.contract.write.createSpace(
       [
@@ -612,8 +630,12 @@ export class TownsquareClient {
         end,
         snapshot,
         choices.map((choice) => stringToHex(choice, { size: 32 })),
-        actions.map((action) => action.executor ? action.executor as Address : zeroAddress),
-        actions.map((action) => action.data ? action.data as Hex : zeroHash ),
+        actions.map((action) =>
+          action.executor ? (action.executor as Address) : zeroAddress
+        ),
+        actions.map((action) =>
+          action.data ? (action.data as Hex) : zeroHash
+        ),
       ],
       { account: this.account!, chain: this.chain }
     );

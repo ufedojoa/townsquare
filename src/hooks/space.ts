@@ -158,6 +158,7 @@ export function useUserInSpace(spaceId?: bigint): boolean {
 export function useSpaces(count: number = 20): {
   data?: Space[];
   error?: object;
+  allResultsFetched: boolean;
 } {
   const client = useClient();
   const [spaces, setSpaces] = useState<Space[]>();
@@ -173,7 +174,6 @@ export function useSpaces(count: number = 20): {
   useEffect(() => {
     if (resultsEnd) return;
     if ((spaces?.length ?? 0) >= count) return;
-
     client
       ?.getSpaces({
         skip: spaces?.length ?? 0,
@@ -193,6 +193,7 @@ export function useSpaces(count: number = 20): {
   return {
     data: spaces,
     error: error,
+    allResultsFetched: resultsEnd,
   };
 }
 
