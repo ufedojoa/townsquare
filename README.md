@@ -2,7 +2,7 @@
 
 ## Project Demo URL
 
-https://ubit-townsquare.vercel.app
+https://trytownsquare.vercel.app
 
 ## Demo Video
 
